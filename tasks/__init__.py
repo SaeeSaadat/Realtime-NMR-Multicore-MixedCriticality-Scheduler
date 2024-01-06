@@ -53,7 +53,8 @@ class LowCriticalityTask(Task):
 
 
 class HighCriticalityTask(Task):
-    def __init__(self, period, wcet_hi, wcet_lo, utilization, name=None):
+    def __init__(self, period, wcet_hi, wcet_lo, utilization, number_of_copies=1, name=None):
         super().__init__(period, wcet_hi, utilization, name)
         self.wcet_lo = wcet_lo
         self.name = self.name + '-HC'
+        self.number_of_copies = number_of_copies

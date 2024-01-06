@@ -11,7 +11,7 @@ import math
 
 def calculated_number_of_copies(reliability, task_failure_probability):
     if task_failure_probability == 0:
-        return
+        return 1
     return math.ceil(math.log2(1 - reliability) / math.log2(task_failure_probability))
 
 

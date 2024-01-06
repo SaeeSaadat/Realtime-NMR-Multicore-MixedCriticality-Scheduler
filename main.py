@@ -8,7 +8,10 @@ def main(config_file):
     config = tasks.ProjectConfig(config_file)
     generated_tasks = task_generator.generate_tasks(config)
     for t in generated_tasks:
-        print(t.name, t.period, t.wcet if isinstance(t, LowCriticalityTask) else (t.wcet, t.wcet_lo), t.utilization)
+        if isinstance(t, LowCriticalityTask):
+            print(t.name, t.period, t.wcet, t.utilization)
+        else:
+            print(t.name, t.period, t.wcet, t.wcet_lo, t.utilization, t.number_of_copies)
 
 
 if __name__ == '__main__':
