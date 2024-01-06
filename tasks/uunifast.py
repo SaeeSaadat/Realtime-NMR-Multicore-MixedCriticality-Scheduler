@@ -47,5 +47,5 @@ def generate_uunifast_discard(nsets: int, u: float, n: int):
 
 
 if __name__ == '__main__':
-    task_utilizations = generate_uunifast_discard(nsets=5, u=0.1, n=10)
+    task_utilizations = generate_uunifast_discard(nsets=5, u=0.75, n=10)
     _write_to_csv('task_utilizations.csv', task_utilizations, 10)
