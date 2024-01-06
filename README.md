@@ -10,9 +10,6 @@ If the mode is `debug`, the program will print the results to the console.
 If the mode is `report`, the program will generate two csv reports in the `reports` folder. One for the tasks and one for the core assignments.
 the name of the report will correspond to the config file and the assignment method used for the tasks.
 
-## UUniFast task generation
-Task generation based on the UUniFast algorithm is done based on [This Paper](https://sharif.edu/~ansari/pdfs/LETR-MC.pdf)
-
 ## Config
 The config file is a YML file that contains the following fields:
 - `random_seed`: The seed used for generating random numbers. (Optional for consistent results)
@@ -29,9 +26,17 @@ The config file is a YML file that contains the following fields:
 - `scheduling_policy`: The policy used for scheduling the tasks. (Only `EDF-VD` has been implemented)
 
 
+## UUniFast task generation
+Task generation based on the UUniFast algorithm is done based on [This Paper](https://sharif.edu/~ansari/pdfs/LETR-MC.pdf)
+Since we are using NMR, the utilization generated for HC tasks is divided by the number of copies needed to achieve the required reliability.
+
+
 ## Calculating the number of copies needed to ensure reliability
 using this formula:
 ```
 N = ceil(-log(1 - R) / log(P)) if P ≠ 0, else 0
 ```
 The number of copies we need for a task with failure rate of P to achieve reliability of R is calculated.
+
+## Task Assignment
+The tasks are assigned to cores based on the chosen policy. The policies implemented are `WFD` and `FFD`.
