@@ -3,6 +3,8 @@ This module is used to generate and define tasks related to the project.
 """
 
 import random
+from typing import List
+
 import yaml
 
 
@@ -39,7 +41,8 @@ class Task:
         self.wcet = wcet
         self.utilization = utilization
         self.name = name if name is not None else f'T{Task.number_of_tasks + 1}'
-        Task.number_of_tasks += 1
+        if not isinstance(self, HighCriticalityTaskCopy):
+            Task.number_of_tasks += 1
 
     @staticmethod
     def reset_tasks():
@@ -58,3 +61,24 @@ class HighCriticalityTask(Task):
         self.wcet_lo = wcet_lo
         self.name = self.name + '-HC'
         self.number_of_copies = number_of_copies
+
+
+class HighCriticalityTaskCopy(HighCriticalityTask):
+    def __init__(self, task: HighCriticalityTask, copy_number=None):
+        task_name = task.name + f'-Copy{copy_number}' if copy_number is not None else task.name + '-Copy'
+        super().__init__(task.period, task.wcet, task.wcet_lo, task.utilization, task.number_of_copies, task_name)
+        self.original_task = task
+
+
+class Processor:
+    def __init__(self, name, max_utilization):
+        self.name = name
+        self.max_utilization = max_utilization
+        self.tasks: List[Task] = []
+        # TODO: Add overrun status and fault status
+
+    def add_task(self, task: Task):
+        self.tasks.append(task)
+
+    def utilization(self):
+        return sum(t.utilization for t in self.tasks)

@@ -1,6 +1,6 @@
 import random
 
-from tasks import Task, HighCriticalityTask, LowCriticalityTask
+from tasks import Task, HighCriticalityTask, LowCriticalityTask, HighCriticalityTaskCopy
 from tasks import ProjectConfig
 from tasks import uunifast
 from tasks.n_modular_redundancy import calculated_number_of_copies
@@ -24,7 +24,10 @@ def generate_tasks(config: ProjectConfig):
         mu = random.uniform(config.mu_range[0], config.mu_range[1])
         wcet_lo = wcet_hi * mu
         num_of_copies = calculated_number_of_copies(config.reliability, config.error_rate)
-        tasks.append(HighCriticalityTask(period, wcet_hi, wcet_lo, u, num_of_copies))
+        task = HighCriticalityTask(period, wcet_hi, wcet_lo, u, num_of_copies)
+        tasks.append(task)
+        for i in range(1, num_of_copies):
+            tasks.append(HighCriticalityTaskCopy(task, i))
 
     for u in utilizations[partition:]:
         # LC Tasks
