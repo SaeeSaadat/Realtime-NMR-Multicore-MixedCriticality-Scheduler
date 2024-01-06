@@ -1,6 +1,10 @@
 # Realtime-NMR-Multicore-MixedCriticality-Scheduler
 Sharif University of Technology - Real Time Systems project
 
+## Team
+- Saee Saadat
+- Neda Taghizadeh
+
 ## Usage
 ```shell
 python main.py <config_number> <mode>
