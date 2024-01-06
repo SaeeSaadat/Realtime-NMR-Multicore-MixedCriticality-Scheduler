@@ -1,8 +1,9 @@
 import sys
+
 import tasks
 from tasks import task_generator, LowCriticalityTask
-import csv
 from task_assigner import worst_fit_decreasing
+from reporter import report
 
 
 def show_tasks(generated_tasks):
@@ -15,7 +16,7 @@ def show_tasks(generated_tasks):
 
 def show_core_assignments(cores):
     for c in cores:
-        print(c.name, c.utilization(), c.max_utilization)
+        print(c.name, "\tUtilization:", c.utilization())
         for t in c.tasks:
             print('\t', t.name, t.period, t.wcet, t.utilization)
 
@@ -26,28 +27,18 @@ def main(config_file, mode):
     generated_tasks = task_generator.generate_tasks(config)
     cores = [tasks.Processor(f'CPU_{i}', config.core_utilization) for i in range(config.num_of_cores)]
 
-    # worst_fit_decreasing(cores, generated_tasks)
-    # show_core_assignments(cores)
+    worst_fit_decreasing(cores, generated_tasks)
 
     if mode == 'debug':
         show_tasks(generated_tasks)
-        print("====================")
-        # show_core_assignments(cores)
+        print("\n====================\n")
+        show_core_assignments(cores)
+        print("\n====================\n")
+        print("Total Utilization:", sum([c.utilization() for c in cores]))
+
     elif mode == 'report':
-        with open(f'reports/{config_name}-tasks-report.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Task Name', 'Period', 'Criticality', 'WCET-HI', 'WCET-LO', 'Utilization'])
-            for t in generated_tasks:
-                if isinstance(t, LowCriticalityTask):
-                    writer.writerow([t.name, t.period, 'LC', t.wcet, None, t.utilization])
-                elif isinstance(t, tasks.HighCriticalityTask):
-                    writer.writerow([t.name, t.period, 'HC', t.wcet, t.wcet_lo, t.utilization])
-        with open(f'reports/{config_name}-assignment-report.csv', 'w') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Task Name', 'Period', 'WCET', 'Utilization', 'Core Name'])
-            for c in cores:
-                for t in c.tasks:
-                    writer.writerow([t.name, t.period, t.wcet, t.utilization, c.name])
+        report(config, cores, generated_tasks)
+
 
 
 if __name__ == '__main__':

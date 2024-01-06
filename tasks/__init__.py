@@ -28,6 +28,7 @@ class ProjectConfig:
         self.reliability = cf['reliability']
         self.assignment_policy = cf['assignment_policy']
         self.scheduling_policy = cf['scheduling_policy']
+        self.config_name = config_file.split('/')[-1].split('.')[0] + '-' + self.assignment_policy
 
         if cf.get('random_seed'):
             random.seed(cf['random_seed'])
