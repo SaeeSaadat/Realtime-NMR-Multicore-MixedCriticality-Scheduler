@@ -2,7 +2,7 @@
 This module is used to generate and define tasks related to the project.
 """
 
-from enum import Enum
+import random
 import yaml
 
 
@@ -27,11 +27,8 @@ class ProjectConfig:
         self.assignment_policy = cf['assignment_policy']
         self.scheduling_policy = cf['scheduling_policy']
 
-
-class TaskCriticality(Enum):
-    # Maybe not needed
-    HC = 1
-    LC = 2
+        if cf.get('random_seed'):
+            random.seed(cf['random_seed'])
 
 
 class Task:

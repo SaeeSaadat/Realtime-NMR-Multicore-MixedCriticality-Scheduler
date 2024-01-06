@@ -3,19 +3,10 @@ This file is used to generate the task set for the simulation, using UUnifast al
 This code has been based on this source: https://github.com/abolfazl9403/task_generation/blob/main/uunifast.py
 """
 
-import csv
 import random
 
 
-def _write_to_csv(filename, sets, n):
-    with open(filename, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(['Task ' + str(i) for i in range(1, n + 1)])
-        for utilizations in sets:
-            writer.writerow(utilizations)
-
-
-def generate_uunifast_discard(nsets: int, u: float, n: int):
+def generate_uunifast_discard(num_sets: int, u: float, n: int):
     """
     The UUniFast algorithm was proposed by Bini for generating task
     utilizations on uniprocessor architectures.
@@ -27,11 +18,11 @@ def generate_uunifast_discard(nsets: int, u: float, n: int):
     Args:
         -   n  : The number of tasks in a task set.
         -   u  : Total utilization of the task set.
-        -   nsets  : Number of sets to generate.
-    Returns   nsets   of   n   task utilizations.
+        -   num_sets  : Number of sets to generate.
+    Returns   num_sets   of   n   task utilizations.
     """
     sets = []
-    while len(sets) < nsets:
+    while len(sets) < num_sets:
         utilizations = []
         sum_u = u
         for i in range(1, n):
@@ -44,8 +35,3 @@ def generate_uunifast_discard(nsets: int, u: float, n: int):
             sets.append(utilizations)
 
     return sets
-
-
-if __name__ == '__main__':
-    task_utilizations = generate_uunifast_discard(nsets=5, u=0.75, n=10)
-    _write_to_csv('task_utilizations.csv', task_utilizations, 10)

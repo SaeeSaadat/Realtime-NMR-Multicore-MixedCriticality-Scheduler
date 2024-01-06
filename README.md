@@ -11,6 +11,7 @@ Task generation based on the UUniFast algorithm is done based on [This Paper](ht
 
 ## Config
 The config file is a YML file that contains the following fields:
+- `random_seed`: The seed used for generating random numbers. (Optional for consistent results)
 - `num_of_tasks`: Number of tasks to be generated
 - `ratio`: Ratio of the number of high criticality tasks to the number of low criticality tasks
 - `num_of_cores`: Number of cores in the system
