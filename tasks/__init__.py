@@ -32,12 +32,28 @@ class ProjectConfig:
 
 
 class Task:
-    pass
+    number_of_tasks = 0
+
+    def __init__(self, period, wcet, utilization, name=None):
+        self.period = period
+        self.wcet = wcet
+        self.utilization = utilization
+        self.name = name if name is not None else f'T{Task.number_of_tasks + 1}'
+        Task.number_of_tasks += 1
+
+    @staticmethod
+    def reset_tasks():
+        Task.number_of_tasks = 0
 
 
 class LowCriticalityTask(Task):
-    pass
+    def __init__(self, period, wcet, utilization, name=None):
+        super().__init__(period, wcet, utilization, name)
+        self.name = self.name + '-LC'
 
 
 class HighCriticalityTask(Task):
-    pass
+    def __init__(self, period, wcet_hi, wcet_lo, utilization, name=None):
+        super().__init__(period, wcet_hi, utilization, name)
+        self.wcet_lo = wcet_lo
+        self.name = self.name + '-HC'

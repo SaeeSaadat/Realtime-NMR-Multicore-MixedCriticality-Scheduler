@@ -13,15 +13,24 @@ def generate_tasks(config: ProjectConfig):
     utilizations = (
         uunifast.generate_uunifast_discard(1, config.num_of_cores * config.core_utilization, config.num_of_tasks))[0]
 
+    Task.reset_tasks()
     tasks: list[Task] = []
-    for u in utilizations[:int(config.num_of_tasks * config.ratio)]:
+    partition = int(config.num_of_tasks * config.ratio)
+    for u in utilizations[:partition]:
         # HC Tasks
         period = random.choice(config.periods)
         wcet_hi = u * period
         mu = random.uniform(config.mu_range[0], config.mu_range[1])
         wcet_lo = wcet_hi * mu
-        tasks.append(HighCriticalityTask(u, period, wcet_hi, wcet_lo))
-        # tasks.append(HighCriticalityTask(u, config.period_range, config.deadline_range, config.wcet_range))
+        tasks.append(HighCriticalityTask(period, wcet_hi, wcet_lo, u))
+
+    for u in utilizations[partition:]:
+        # LC Tasks
+        period = random.choice(config.periods)
+        wcet = u * period
+        tasks.append(LowCriticalityTask(period, wcet, u))
+
+    return tasks
 
 
 
