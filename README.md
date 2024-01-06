@@ -23,3 +23,11 @@ The config file is a YML file that contains the following fields:
 - `reliability`: The required reliability of the system 
 - `assignment_policy`: The policy used for assigning tasks to cores. (`WFD` or `FFD`)
 - `scheduling_policy`: The policy used for scheduling the tasks. (Only `EDF-VD` has been implemented)
+
+
+## Calculating the number of copies needed to ensure reliability
+using this formula:
+```
+N = ceil(-log(1 - R) / log(P)) if P ≠ 0, else 0
+```
+The number of copies we need for a task with failure rate of P to achieve reliability of R is calculated.
