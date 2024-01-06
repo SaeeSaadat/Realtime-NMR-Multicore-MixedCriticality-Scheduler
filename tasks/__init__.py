@@ -65,7 +65,7 @@ class HighCriticalityTask(Task):
 
 class HighCriticalityTaskCopy(HighCriticalityTask):
     def __init__(self, task: HighCriticalityTask, copy_number=None):
-        task_name = task.name + f'-Copy{copy_number}' if copy_number is not None else task.name + '-Copy'
+        task_name = task.name.split('-')[0] + f'-Copy{copy_number}' if copy_number is not None else task.name + '-Copy'
         super().__init__(task.period, task.wcet, task.wcet_lo, task.utilization, task.number_of_copies, task_name)
         self.original_task = task
 

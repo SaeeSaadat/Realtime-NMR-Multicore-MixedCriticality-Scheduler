@@ -22,6 +22,7 @@ def generate_uunifast_discard(num_sets: int, u: float, n: int):
     Returns   num_sets   of   n   task utilizations.
     """
     sets = []
+    num_of_tries = 0
     while len(sets) < num_sets:
         utilizations = []
         sum_u = u
@@ -33,5 +34,8 @@ def generate_uunifast_discard(num_sets: int, u: float, n: int):
 
         if all(ut <= 1 for ut in utilizations):
             sets.append(utilizations)
+        num_of_tries += 1
+        if num_of_tries > 10000:
+            raise Exception("Number of tries to generate tasks exceeded 1000")
 
     return sets
