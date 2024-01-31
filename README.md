@@ -7,7 +7,7 @@ Sharif University of Technology - Real Time Systems project
 
 ## Usage
 ```shell
-python main.py <config_number> <mode>
+python generate.py <config_number> <mode>
 ```
 the mode argument is optional and can be either `debug` or `report`.
 If the mode is `debug`, the program will print the results to the console.

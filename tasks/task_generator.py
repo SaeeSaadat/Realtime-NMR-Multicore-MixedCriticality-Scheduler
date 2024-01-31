@@ -4,7 +4,7 @@ import math
 from tasks import Task, HighCriticalityTask, LowCriticalityTask, HighCriticalityTaskCopy
 from tasks import ProjectConfig
 from tasks import uunifast
-from tasks.n_modular_redundancy import calculated_number_of_copies
+from tasks.n_modular_redundancy import calculated_number_of_copies, calculate_based_on_formulas
 """
 This file should be visible to other modules
 Generating the tasks must be done using this file

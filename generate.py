@@ -2,6 +2,7 @@ import sys
 
 import tasks
 from tasks import task_generator, LowCriticalityTask
+from tasks.exceptions import UnassignableTaskSet
 from task_assigner import worst_fit_decreasing, first_fit_decreasing
 from reporter import report
 
@@ -21,17 +22,20 @@ def show_core_assignments(cores):
             print('\t', t.name, t.period, t.wcet, t.utilization)
 
 
-def main(config_file, mode):
+def generate(config_file, mode=None):
     config = tasks.ProjectConfig(config_file)
     generated_tasks = task_generator.generate_tasks(config)
     cores = [tasks.Processor(f'CPU_{i}', config.core_utilization) for i in range(config.num_of_cores)]
 
-    if config.assignment_policy == 'WFD':
-        worst_fit_decreasing(cores, generated_tasks)
-    elif config.assignment_policy == 'FFD':
-        first_fit_decreasing(cores, generated_tasks)
-    else:
-        raise Exception('Unknown assignment policy: ' + config.assignment_policy)
+    try:
+        if config.assignment_policy == 'WFD':
+            worst_fit_decreasing(cores, generated_tasks)
+        elif config.assignment_policy == 'FFD':
+            first_fit_decreasing(cores, generated_tasks)
+        else:
+            raise Exception('Unknown assignment policy: ' + config.assignment_policy)
+    except UnassignableTaskSet:
+        return
 
     if mode == 'debug':
         show_tasks(generated_tasks)
@@ -43,15 +47,17 @@ def main(config_file, mode):
     elif mode == 'report':
         report(config, cores, generated_tasks)
 
+    return cores, generated_tasks
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2 or len(sys.argv) > 3:
-        print('Usage: python main.py {CONFIG_FILE} {debug/report}')
+        print('Usage: python generate.py {CONFIG_FILE} {debug/report}')
         exit(1)
     the_mode = None
     if len(sys.argv) > 2:
         the_mode = sys.argv[2]
         if the_mode not in ['debug', 'report']:
-            print('Usage: python main.py {CONFIG_FILE} {debug/report}')
+            print('Usage: python generate.py {CONFIG_FILE} {debug/report}')
             exit(1)
-    main(sys.argv[1], the_mode)
+    generate(sys.argv[1], the_mode)

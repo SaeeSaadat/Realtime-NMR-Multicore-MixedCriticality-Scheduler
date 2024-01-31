@@ -1,5 +1,7 @@
-from tasks import Task, Processor, HighCriticalityTask
 from typing import List
+
+from tasks import Task, Processor, HighCriticalityTask
+from tasks.exceptions import DuplicateTaskAssignmentException, UnassignableTaskSet
 
 
 def worst_fit_decreasing(cores: List[Processor], tasks: List[Task]):
@@ -8,10 +10,13 @@ def worst_fit_decreasing(cores: List[Processor], tasks: List[Task]):
         cores = sorted(cores, key=lambda c: c.utilization())
         for c in cores:
             if 1 - c.utilization() >= t.utilization:
-                c.add_task(t)
-                break
+                try:
+                    c.add_task(t)
+                    break
+                except DuplicateTaskAssignmentException:
+                    continue
         else:
-            raise Exception('No core found for task ' + t.name)
+            raise UnassignableTaskSet('No core found for task ' + t.name)
 
 
 def first_fit_decreasing(cores: List[Processor], tasks: List[Task]):
@@ -19,7 +24,10 @@ def first_fit_decreasing(cores: List[Processor], tasks: List[Task]):
     for t in tasks:
         for c in cores:
             if 1 - c.utilization() >= t.utilization:
-                c.add_task(t)
-                break
+                try:
+                    c.add_task(t)
+                    break
+                except DuplicateTaskAssignmentException:
+                    continue
         else:
-            raise Exception('No core found for task ' + t.name)
+            raise UnassignableTaskSet('No core found for task ' + t.name)
