@@ -1,4 +1,4 @@
-random_seed: 42
+#random_seed: 42
 num_of_tasks: 30
 ratio: 0.5
 num_of_cores: 16

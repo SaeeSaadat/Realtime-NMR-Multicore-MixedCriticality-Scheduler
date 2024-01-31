@@ -29,14 +29,13 @@ def run_simulation(
     # {core: {task: (deadline, remaining_time)}}
 
     while time < hyper_period:
+        # Check if core has failure or overrun
+        if time in core_failures:
+            core_failures[time].fail(time)
+        if time in core_overruns:
+            core_overruns[time].overrun(time)
+
         for core in cores:
-
-            # Check if core has failure or overrun
-            if time in core_failures:
-                core.fail(time)
-            if time in core_overruns:
-                core.overrun(time)
-
             if not edf_only:
                 if core.is_overrun:
                     # drop all LC tasks from active_tasks
@@ -74,11 +73,13 @@ def run_simulation(
                                 t.cancel(time)
 
             # Check if any deadlines are missed
-            for task, (deadline, remaining_time) in active_tasks[core].items():
-                print(task, deadline, remaining_time)
-                if remaining_time > 0 and deadline <= time:
-                    task.fail(time)
-                    # If it's a high criticality task, it will automatically raise an exception
+            missed_deadline_tasks = [task for task, (deadline, remaining_time) in active_tasks[core].items() if
+                                     remaining_time > 0 and deadline <= time]
+            for task in missed_deadline_tasks:
+                task.fail(time)
+                # If it's a high criticality task, it will automatically raise an exception
+                # remove the task from active_tasks
+                active_tasks[core].pop(task)
 
             # Select the task with the highest priority, using the EDF-VD scheduling policy
             if active_tasks[core]:

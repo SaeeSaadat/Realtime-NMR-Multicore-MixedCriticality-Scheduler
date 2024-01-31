@@ -76,6 +76,8 @@ class LowCriticalityTask(Task):
     def __init__(self, period, wcet, utilization, name=None):
         super().__init__(period, wcet, utilization, name)
         self.name = self.name + '-LC'
+        self.quality_time = 0
+        self.total_time = 0
 
 
 class HighCriticalityTask(Task):
@@ -136,9 +138,9 @@ class Processor:
         event_logger.log(time, f'{self.name} -> CORE OVERRUN')
 
     def calculate_edf_vd_constant(self):
+        if not any(filter(lambda t: isinstance(t, HighCriticalityTask), self.tasks)):
+            return 1
         utilization_hi_lo = sum(t.wcet_lo / t.period for t in self.tasks if isinstance(t, HighCriticalityTask))
-        print("\t", utilization_hi_lo)
         utilization_lo_lo = sum(t.wcet / t.period for t in self.tasks if isinstance(t, LowCriticalityTask))
-        print("\t", utilization_lo_lo)
         x = utilization_hi_lo / (1 - utilization_lo_lo)
         return x

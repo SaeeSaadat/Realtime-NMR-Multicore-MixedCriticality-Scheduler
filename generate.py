@@ -27,15 +27,12 @@ def generate(config_file, mode=None):
     generated_tasks = task_generator.generate_tasks(config)
     cores = [tasks.Processor(f'CPU_{i}', config.core_utilization) for i in range(config.num_of_cores)]
 
-    try:
-        if config.assignment_policy == 'WFD':
-            worst_fit_decreasing(cores, generated_tasks)
-        elif config.assignment_policy == 'FFD':
-            first_fit_decreasing(cores, generated_tasks)
-        else:
-            raise Exception('Unknown assignment policy: ' + config.assignment_policy)
-    except UnassignableTaskSet:
-        return
+    if config.assignment_policy == 'WFD':
+        worst_fit_decreasing(cores, generated_tasks)
+    elif config.assignment_policy == 'FFD':
+        first_fit_decreasing(cores, generated_tasks)
+    else:
+        raise Exception('Unknown assignment policy: ' + config.assignment_policy)
 
     if mode == 'debug':
         show_tasks(generated_tasks)

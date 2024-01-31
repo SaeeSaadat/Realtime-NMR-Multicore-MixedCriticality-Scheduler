@@ -24,7 +24,7 @@ def calculate_number_of_copies():
     failure_rate = 0.3
     wcet = 10
     task_reliability = r_i(wcet, failure_rate)
-    print("task reliability", task_reliability)
+    # print("task reliability", task_reliability)
     task_failure_probability = 1 - task_reliability
     for n in range(1, 20):
         fault_free_reliability = task_reliability ** math.ceil(n / 2)
@@ -34,7 +34,7 @@ def calculate_number_of_copies():
             for i in range(1, math.floor(n / 2) + 1)
         )
         total_reliability = fault_free_reliability + faulty_reliability
-        print(fault_free_reliability, '\t', faulty_reliability, '\t', total_reliability)
+        # print(fault_free_reliability, '\t', faulty_reliability, '\t', total_reliability)
 
 
 def calculate_based_on_formulas(wcet_hi, wcet_lo):
