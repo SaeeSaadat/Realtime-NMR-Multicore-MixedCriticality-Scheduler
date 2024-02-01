@@ -1,18 +1,25 @@
 """
+
+IMPORTANT NOTE:
+This project will use TMR instead of NMR going forward.
+therefor this file is no longer used except for the first function which just returns 3 (THREE modular redundancy)
+
+
 to calculate the number of copies needed:
 
 Reliability = 1 - P ^ n
 => log (1 - R) / log (P)
 N = ceil(-log(1 - R) / log(P)) if P ≠ 0, else 0
-TODO: calculate P
 """
 import math
 
 
 def calculated_number_of_copies(reliability, task_failure_probability):
-    if task_failure_probability == 0:
-        return 1
-    return math.ceil(math.log2(1 - reliability) / math.log2(task_failure_probability))
+    return 3
+
+    # if task_failure_probability == 0:
+    #     return 1
+    # return math.ceil(math.log2(1 - reliability) / math.log2(task_failure_probability))
 
 
 def r_i(wcet, fault_rate):
