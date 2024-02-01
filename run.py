@@ -11,13 +11,10 @@ from simulation.exceptions import UnschedulableException
 
 def run_for_batch(config_file, batch_number: int):
     cores, generated_tasks = generate.generate(config_file)
-    if cores is None:
-        print(f"{batch_number} is unassignable")
-        raise UnassignableTaskSet
-
     try:
         simulator.run_simulation(cores)
     except HighCriticalityTaskFailureException:
+        event_logger.log_event('Simulation failed due to High criticality task failure')
         raise UnschedulableException
 
 
@@ -28,8 +25,8 @@ def run(config_file):
     event_logger.setup(config_file)
 
     number_of_batches = global_config['number_of_batches']
-    failed_assign_count = 0
-    failed_scheduled_count = 0
+    number_of_batches = 1
+
     for rnd in range(number_of_batches):
         print(f"====================\nBatch {rnd}\n====================")
         try:
@@ -37,16 +34,9 @@ def run(config_file):
             if rnd < number_of_batches - 1:
                 event_logger.next_batch()
         except UnassignableTaskSet:
-            # print(f"{rnd} is unassignable")
-            failed_assign_count += 1
-            failed_scheduled_count += 1
+            event_logger.log_failed_task_assignment()
         except UnschedulableException:
-            # print(f"{rnd} is unschedulable")
-            failed_scheduled_count += 1
-
-    with open(f'logs/{config_file}/stats', 'w') as f:
-        f.write(f"Failed Assignments: {failed_assign_count}\n")
-        f.write(f"Failed Schedulings: {failed_scheduled_count}")
+            event_logger.log_failed_scheduling()
 
     event_logger.close()
 

@@ -47,21 +47,17 @@ class Task:
         self.utilization = utilization
         self.name = name if name is not None else f'T{Task.number_of_tasks + 1}'
         self.core = None
+        self.instances = []
+        self.is_active = True
         if not isinstance(self, HighCriticalityTaskCopy):
             Task.number_of_tasks += 1
+
+    def duration(self, **kwargs):
+        return self.wcet
 
     @staticmethod
     def reset_tasks():
         Task.number_of_tasks = 0
-
-    def start(self, time):
-        event_logger.log(time, f'[{self.get_core_name()}] Task {self.name} -> START')
-
-    def finish(self, time):
-        event_logger.log(time, f'[{self.get_core_name()}] Task {self.name} -> FINISH')
-
-    def fail(self, time):
-        event_logger.log(time, f'[{self.get_core_name()}] Task {self.name} -> MISSED DEADLINE!')
 
     def assign_to_core(self, core):
         self.core = core
@@ -70,6 +66,70 @@ class Task:
         if self.core is not None:
             return self.core.name
         return ''
+
+    def instantiate(self, time: int, deadline: int = None) -> 'TaskInstance':
+        instance = TaskInstance(self, time, deadline=deadline)
+        self.instances.append(instance)
+        return instance
+
+    @property
+    def is_actual_deadline_same_as_period(self):
+        """
+        HC tasks in EDF-VD will have a deadline different from their period
+        If the time is past their virtual deadline but not their actual periodical deadline, are they considered failed?
+        """
+        return False
+
+
+class TaskInstance:
+    def __init__(self, task: Task, release_time: int, duration: int = None, deadline: int = None, is_overrun=False):
+        self.task = task
+        self.release_time = release_time
+        self.deadline = deadline if deadline is not None else release_time + self.task.period
+        self.start_time = None
+        self.end_time = None
+        self.duration = duration if duration is not None else self.task.duration(is_overrun=is_overrun)
+        self.remaining_time = self.duration
+        self.number = len(task.instances) + 1
+        event_logger.log(
+            release_time,
+            f'[{self.task.get_core_name()}] Task {self.task.name}::'
+            f'{self.number} -> RELEASE, Deadline: {self.deadline}'
+        )
+
+    def execute(self, time: int, execution_logger: callable = None):
+        if self.start_time is None:
+            event_logger.log(time, f'[{self.task.get_core_name()}] Task {self.task.name} -> START')
+            self.start_time = time
+        self.remaining_time -= 1
+        if execution_logger is not None:
+            execution_logger(time, self)
+
+    def __repr__(self):
+        return f'{self.task.name}::{self.number}'
+
+    def finish(self, time):
+        event_logger.log(time, f'[{self.task.get_core_name()}] Task {self.task.name} -> FINISH')
+
+    def is_failed(self, time) -> bool:
+        if time < self.deadline or self.remaining_time <= 0:
+            return False
+        if self.task.is_actual_deadline_same_as_period:
+            return time > self.release_time + self.task.period
+        return True
+
+    def fail(self, time):
+        if not self.is_failed(time):
+            raise Exception(f"Task {self} is not failed!")
+        event_logger.log(time,
+                         f'[{self.task.get_core_name()}] Task {self.task.name}::{self.number} -> MISSED DEADLINE!')
+
+    @property
+    def is_finished(self):
+        return self.end_time is not None
+
+    def has_missed_deadline(self, current_time: int):
+        return not self.is_finished and current_time > self.deadline
 
 
 class LowCriticalityTask(Task):
@@ -83,13 +143,13 @@ class LowCriticalityTask(Task):
 class HighCriticalityTask(Task):
     def __init__(self, period, wcet_hi, wcet_lo, utilization, number_of_copies=1, name=None):
         super().__init__(period, wcet_hi, utilization, name)
+        self.wcet_hi = wcet_hi
         self.wcet_lo = wcet_lo
         self.name = self.name + '-HC'
         self.number_of_copies = number_of_copies
 
-    def fail(self, time):
-        super().fail(time)
-        raise HighCriticalityTaskFailureException()
+    def duration(self, is_overrun: bool = False, **kwargs):
+        return self.wcet_hi if is_overrun else self.wcet_lo
 
 
 class HighCriticalityTaskCopy(HighCriticalityTask):

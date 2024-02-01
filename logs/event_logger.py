@@ -5,6 +5,9 @@ log_file: TextIOWrapper
 config_name: str
 batch_no: int = 1
 
+records = {}
+execution_table = {}
+
 
 def setup(conf_name):
     global log_file, config_name
@@ -40,3 +43,24 @@ def log(time, event):
         raise Exception('Event logger is not set up')
 
     log_event(f'{time:10.0f}: {event}')
+
+
+def record(key, value):
+    global records
+    records[key] = value
+
+
+def log_records(file='logs/records'):
+    with open(file, 'w') as f:
+        for k, v in records.items():
+            f.write(f'{k}: {v}\n')
+
+
+def log_failed_scheduling():
+    global records
+    records['failed_scheduling'] = records.get('failed_scheduling', 0) + 1
+
+
+def log_failed_task_assignment():
+    global records
+    records['failed_task_assignment'] = records.get('failed_task_assignment', 0) + 1

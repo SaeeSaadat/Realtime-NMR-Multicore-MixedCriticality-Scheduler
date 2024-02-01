@@ -4,7 +4,7 @@ import math
 from tasks import Task, HighCriticalityTask, LowCriticalityTask, HighCriticalityTaskCopy
 from tasks import ProjectConfig
 from tasks import uunifast
-from tasks.n_modular_redundancy import calculated_number_of_copies, calculate_based_on_formulas
+from tasks.n_modular_redundancy import calculated_number_of_copies
 """
 This file should be visible to other modules
 Generating the tasks must be done using this file
@@ -28,8 +28,8 @@ def generate_tasks(config: ProjectConfig):
         mu = random.uniform(config.mu_range[0], config.mu_range[1])
         wcet_lo = wcet_hi * mu
         task = HighCriticalityTask(period, wcet_hi, wcet_lo, util, num_of_copies)
-        tasks.append(task)
-        for i in range(1, num_of_copies):
+        # tasks.append(task)
+        for i in range(1, num_of_copies + 1):
             tasks.append(HighCriticalityTaskCopy(task, i))
 
     for u in utilizations[partition:]:

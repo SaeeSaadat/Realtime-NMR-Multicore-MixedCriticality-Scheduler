@@ -43,7 +43,6 @@ def generate(config_file, mode=None):
 
     elif mode == 'report':
         report(config, cores, generated_tasks)
-
     return cores, generated_tasks
 
 
@@ -57,4 +56,10 @@ if __name__ == '__main__':
         if the_mode not in ['debug', 'report']:
             print('Usage: python generate.py {CONFIG_FILE} {debug/report}')
             exit(1)
-    generate(sys.argv[1], the_mode)
+    for i in range(1000):
+        try:
+            generate(sys.argv[1], the_mode)
+            print(i, "th try!")
+            break
+        except UnassignableTaskSet:
+            continue
