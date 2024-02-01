@@ -1,5 +1,5 @@
 #random_seed: 42
-num_of_tasks: 30
+num_of_tasks: 60
 ratio: 0.5
 num_of_cores: 16
 core_utilization: 0.75
