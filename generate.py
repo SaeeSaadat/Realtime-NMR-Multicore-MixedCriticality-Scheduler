@@ -22,8 +22,7 @@ def show_core_assignments(cores):
             print('\t', t.name, t.period, t.wcet, t.utilization)
 
 
-def generate(config_file, mode=None):
-    config = tasks.ProjectConfig(config_file)
+def generate(config: tasks.ProjectConfig, mode=None):
     generated_tasks = task_generator.generate_tasks(config)
     cores = [tasks.Processor(f'CPU_{i}', config.core_utilization) for i in range(config.num_of_cores)]
 

@@ -97,7 +97,6 @@ class TaskInstance:
         self.remaining_time = self.duration
         self.number = len(task.instances) + 1
         self.deadline_missed_time = None
-        self.overrun_time = None
         self.is_failed = False
         event_logger.log(
             release_time,
@@ -134,7 +133,6 @@ class TaskInstance:
         if not self.is_past_deadline(time):
             raise Exception(f"Task {self} is not failed!")
         self.deadline_missed_time = time
-        print(f"Task {self} missed deadline at {time}")
         self.task.missed_deadline(time, self)
         event_logger.log(time,
                          f'[{self.task.get_core_name()}] Task {self.task.name}::{self.number} -> MISSED DEADLINE!')
@@ -170,8 +168,6 @@ class HighCriticalityTask(Task):
         self.number_of_copies = number_of_copies
 
     def duration(self):
-        if self.core.is_overrun:
-            print("Overrun!")
         return self.wcet_hi if self.core.is_overrun else self.wcet_lo
 
     def missed_deadline(self, time, job: TaskInstance):
@@ -198,6 +194,8 @@ class Processor:
 
         self.is_failed = False
         self.is_overrun = False
+        self.overrun_time = None
+        self.failure_time = None
 
     def add_task(self, task: Task):
         if isinstance(task, HighCriticalityTask):
@@ -219,10 +217,12 @@ class Processor:
 
     def fail(self, time):
         self.is_failed = True
+        self.failure_time = time
         event_logger.log(time, f'{self.name} -> CORE FAILURE')
 
     def overrun(self, time):
         self.is_overrun = True
+        self.overrun_time = time
         event_logger.log(time, f'{self.name} -> CORE OVERRUN')
 
     def calculate_edf_vd_constant(self):

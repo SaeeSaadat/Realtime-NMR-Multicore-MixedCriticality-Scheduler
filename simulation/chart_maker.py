@@ -7,11 +7,18 @@ import tasks
 
 def generate_random_color():
     # Generate random RGB values between 0 and 1
-    return (
-        random.random(),
-        random.random(),
-        random.random()
+    forbidden_colors = [
+        (0, 0, 0),
+        (255, 0, 0)
+    ]
+    # colors should be between 50 and 255
+    color = (
+        random.randint(50, 255) / 255,
+        random.randint(50, 255) / 255,
+        random.randint(50, 255) / 255
     )
+
+    return color
 
 
 def get_appropriate_text_color(r, g, b):
@@ -39,6 +46,20 @@ def plot_gantt_chart(
     ax.set_yticks(list(core_number_dict.values()))
     ax.invert_yaxis()
 
+    for core in cores:
+        # Plot the overrun and failure times
+        core_number = core_number_dict[core]
+        if core in core_overruns:
+            overrun_time = core_overruns[core]
+            ax.annotate('OVR', xy=(overrun_time, core_number),
+                        xytext=(overrun_time + 1, core_number - 0.6),
+                        arrowprops=dict(arrowstyle='-', color='red'), color='red', va='baseline')
+        if core in core_failures:
+            overrun_time = core_failures[core]
+            ax.annotate('FAIL', xy=(overrun_time, core_number),
+                        xytext=(overrun_time + 1, core_number - 0.6),
+                        arrowprops=dict(arrowstyle='-', color='red'), color='red', va='baseline')
+
     # Plot the tasks as horizontal bars
     for job in jobs:
 
@@ -46,7 +67,7 @@ def plot_gantt_chart(
             task_colors[job.task] = generate_random_color()
         color = task_colors[job.task]
         if job.is_failed:
-            color = 'grey'
+            color = (0.2, 0.2, 0.2)
         core = job.task.core
         core_number = core_number_dict[core]
         if job.start_time is not None:
@@ -74,11 +95,6 @@ def plot_gantt_chart(
             ax.annotate('X', xy=(job.deadline_missed_time, core_number),
                         xytext=(job.deadline_missed_time + 1, core_number - 0.6),
                         arrowprops=dict(arrowstyle='-', color='red', linewidth=2), color='red', va='baseline')
-
-        if job.overrun_time:
-            ax.annotate('OVR', xy=(job.overrun_time, core_number),
-                        xytext=(job.overrun_time + 1, core_number - 0.6),
-                        arrowprops=dict(arrowstyle='-', color='orange'), color='orange', va='baseline')
 
     # Set x-ticks and limits
     ax.set_xticks(range(0, total_time + 1, 10))

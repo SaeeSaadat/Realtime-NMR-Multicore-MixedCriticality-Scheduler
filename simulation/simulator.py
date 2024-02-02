@@ -22,8 +22,13 @@ def run_simulation(
 
     execution_table = ExecutionTable(hyper_period)
 
-    core_failures = failure_manager.calculate_failures(cores, task_fail_probability, hyper_period)
-    core_overruns = failure_manager.calculate_failures(cores, overrun_probability, hyper_period)
+    if not edf_only:
+        core_failures, core_failures_inverse = failure_manager.calculate_failures(cores, task_fail_probability,
+                                                                                  hyper_period)
+        core_overruns, core_overruns_inverse = failure_manager.calculate_failures(cores, overrun_probability,
+                                                                                  hyper_period)
+    else:
+        core_failures, core_failures_inverse, core_overruns, core_overruns_inverse = {}, {}, {}, {}
     overrunning_cores = []
 
     all_jobs: List[tasks.TaskInstance] = []
@@ -77,9 +82,10 @@ def run_simulation(
                     # If the job is HC and the core is supposed to overrun, overrun it! (and update the active tasks)
                     if core in overrunning_cores and isinstance(job.task, tasks.HighCriticalityTask):
                         core.overrun(time)
+                        overrunning_cores.remove(core)
 
         if should_plot:
-            chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns, core_failures)
+            chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
     except HighCriticalityTaskFailureException as e:
         print(f"XXXXXXXX High criticality job {e.job} failed at {e.job.deadline_missed_time} XXXXXXXX")
-        chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns, core_failures)
+        chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
