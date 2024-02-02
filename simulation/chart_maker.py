@@ -45,6 +45,8 @@ def plot_gantt_chart(
         if job.task not in task_colors:
             task_colors[job.task] = generate_random_color()
         color = task_colors[job.task]
+        if job.is_failed:
+            color = 'grey'
         core = job.task.core
         core_number = core_number_dict[core]
         if job.start_time is not None:

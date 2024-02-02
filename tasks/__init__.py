@@ -10,6 +10,7 @@ import yaml
 from logs import event_logger
 from tasks.exceptions import HighCriticalityTaskFailureException
 from tasks.exceptions import DuplicateTaskAssignmentException
+from tasks.exceptions import LowCriticalityJobWhileOverrun
 
 
 class ProjectConfig:
@@ -97,6 +98,7 @@ class TaskInstance:
         self.number = len(task.instances) + 1
         self.deadline_missed_time = None
         self.overrun_time = None
+        self.is_failed = False
         event_logger.log(
             release_time,
             f'[{self.task.get_core_name()}] Task {self.task.name}::'
@@ -112,6 +114,8 @@ class TaskInstance:
             self.start_time = time
         self.remaining_time -= 1
         self.end_time = time + 1
+        if self.task.core.is_failed:
+            self.is_failed = True
 
     def __repr__(self):
         return f'{self.task.name}::{self.number}'
@@ -150,6 +154,12 @@ class LowCriticalityTask(Task):
         self.quality_time = 0
         self.total_time = 0
 
+    def instantiate(self, time: int, deadline: int = None) -> 'TaskInstance':
+        if self.core.is_overrun:
+            raise LowCriticalityJobWhileOverrun()
+        instance = super().instantiate(time, deadline)
+        instance.duration = self.wcet
+        return instance
 
 class HighCriticalityTask(Task):
     def __init__(self, period, wcet_hi, wcet_lo, utilization, number_of_copies=1, name=None):

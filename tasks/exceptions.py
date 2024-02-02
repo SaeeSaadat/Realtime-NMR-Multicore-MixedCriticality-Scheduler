@@ -6,6 +6,10 @@ class UnassignableTaskSet(Exception):
     pass
 
 
+class LowCriticalityJobWhileOverrun(Exception):
+    pass
+
+
 class HighCriticalityTaskFailureException(Exception):
     def __init__(self, job):
         super().__init__()

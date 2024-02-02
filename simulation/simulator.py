@@ -6,7 +6,7 @@ from simulation import exceptions, failure_manager, chart_maker
 from simulation.execution_table import ExecutionTable
 
 import tasks
-from tasks import HighCriticalityTaskFailureException
+from tasks.exceptions import HighCriticalityTaskFailureException, LowCriticalityJobWhileOverrun
 
 
 def run_simulation(
@@ -34,7 +34,7 @@ def run_simulation(
             # Check if core has failure or overrun
             if time in core_failures:
                 core_failures[time].fail(time)
-            if time in core_overruns:
+            if not edf_only and time in core_overruns:
                 overrunning_cores.append(core_overruns[time])
             for core in cores:
 
@@ -43,7 +43,6 @@ def run_simulation(
                     if job.is_finished:
                         job.finish(time)
                         active_jobs[core].remove(job)
-                        temp = 0
 
                 # Check for jobs past their deadlines
                 for job in active_jobs[core]:
@@ -54,9 +53,17 @@ def run_simulation(
                 # Check for released tasks
                 for task in core.tasks:
                     if time % task.period == 0:
-                        job = task.instantiate(time)
-                        all_jobs.append(job)
-                        active_jobs[core].append(job)
+                        try:
+                            if edf_only:
+                                job = task.instantiate(time, deadline=time + task.period)
+                            else:
+                                job = task.instantiate(time)
+                            all_jobs.append(job)
+                            active_jobs[core].append(job)
+                        except LowCriticalityJobWhileOverrun:
+                            # If the core is overrun, and a low criticality task is released, just forget about it!
+                            event_logger.log(time, f'Low criticality job {task.name} dropped while core is overrun')
+                            continue
 
                 # Sort tasks based on their deadline
                 active_jobs[core].sort(key=lambda x: x.deadline)
@@ -67,11 +74,12 @@ def run_simulation(
                     job.execute(time)
                     execution_table.record_snapshot(time, job)
 
-                # If it's HC and the core is supposed to overrun, overrun it! (and update the active tasks)
+                    # If the job is HC and the core is supposed to overrun, overrun it! (and update the active tasks)
+                    if core in overrunning_cores and isinstance(job.task, tasks.HighCriticalityTask):
+                        core.overrun(time)
+
         if should_plot:
             chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns, core_failures)
     except HighCriticalityTaskFailureException as e:
         print(f"XXXXXXXX High criticality job {e.job} failed at {e.job.deadline_missed_time} XXXXXXXX")
         chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns, core_failures)
-
-
