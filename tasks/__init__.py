@@ -3,7 +3,7 @@ This module is used to generate and define tasks related to the project.
 """
 
 import random
-from typing import List
+from typing import List, Optional
 
 import yaml
 
@@ -46,13 +46,13 @@ class Task:
         self.wcet = round(wcet) if round(wcet) >= 1 else 1
         self.utilization = utilization
         self.name = name if name is not None else f'T{Task.number_of_tasks + 1}'
-        self.core = None
+        self.core: Optional[Processor] = None
         self.instances = []
         self.is_active = True
         if not isinstance(self, HighCriticalityTaskCopy):
             Task.number_of_tasks += 1
 
-    def duration(self, **kwargs):
+    def duration(self):
         return self.wcet
 
     @staticmethod
@@ -77,18 +77,19 @@ class Task:
         """
         HC tasks in EDF-VD will have a deadline different from their period
         If the time is past their virtual deadline but not their actual periodical deadline, are they considered failed?
+        If this function returns True, then they are considered failed only AFTER they go past their PERIOD!
         """
-        return False
+        return True
 
 
 class TaskInstance:
-    def __init__(self, task: Task, release_time: int, duration: int = None, deadline: int = None, is_overrun=False):
+    def __init__(self, task: Task, release_time: int, duration: int = None, deadline: int = None):
         self.task = task
         self.release_time = release_time
         self.deadline = deadline if deadline is not None else release_time + self.task.period
         self.start_time = None
         self.end_time = None
-        self.duration = duration if duration is not None else self.task.duration(is_overrun=is_overrun)
+        self.duration = duration if duration is not None else self.task.duration()
         self.remaining_time = self.duration
         self.number = len(task.instances) + 1
         event_logger.log(
@@ -97,13 +98,12 @@ class TaskInstance:
             f'{self.number} -> RELEASE, Deadline: {self.deadline}'
         )
 
-    def execute(self, time: int, execution_logger: callable = None):
+    def execute(self, time: int):
         if self.start_time is None:
             event_logger.log(time, f'[{self.task.get_core_name()}] Task {self.task.name} -> START')
             self.start_time = time
         self.remaining_time -= 1
-        if execution_logger is not None:
-            execution_logger(time, self)
+        self.end_time = time + 1
 
     def __repr__(self):
         return f'{self.task.name}::{self.number}'
@@ -126,7 +126,7 @@ class TaskInstance:
 
     @property
     def is_finished(self):
-        return self.end_time is not None
+        return self.remaining_time <= 0
 
     def has_missed_deadline(self, current_time: int):
         return not self.is_finished and current_time > self.deadline
@@ -148,8 +148,10 @@ class HighCriticalityTask(Task):
         self.name = self.name + '-HC'
         self.number_of_copies = number_of_copies
 
-    def duration(self, is_overrun: bool = False, **kwargs):
-        return self.wcet_hi if is_overrun else self.wcet_lo
+    def duration(self):
+        if self.core.is_overrun:
+            print("Overrun!")
+        return self.wcet_hi if self.core.is_overrun else self.wcet_lo
 
 
 class HighCriticalityTaskCopy(HighCriticalityTask):

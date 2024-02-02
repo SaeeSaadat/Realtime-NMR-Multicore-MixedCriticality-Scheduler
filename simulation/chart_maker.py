@@ -19,42 +19,53 @@ def get_appropriate_text_color(r, g, b):
     return 'black' if brightness > 0.5 else 'white'
 
 
-def plot_gantt_chart(jobs: List[tasks.TaskInstance], core_overruns: dict, core_failures: dict):
+def plot_gantt_chart(
+        total_time: int,
+        jobs: List[tasks.TaskInstance],
+        cores: List[tasks.Processor],
+        core_overruns: dict,
+        core_failures: dict
+):
     task_colors: Dict[tasks.Task, Tuple[float, float, float]] = {}
+    core_number_dict = {core: i for i, core in enumerate(cores)}
 
     # Set up the figure and axis
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(100, 25))
     ax.set_xlabel('Time')
     ax.set_ylabel('Core')
 
     # Set y-ticks for the cores
-    ax.set_yticks(range(1, num_cores + 1))
+    ax.set_yticks(list(core_number_dict.values()))
     ax.invert_yaxis()
 
     # Plot the tasks as horizontal bars
     for job in jobs:
+        if job.start_time is None:
+            continue
+
         if job.task not in task_colors:
             task_colors[job.task] = generate_random_color()
         color = task_colors[job.task]
         core = job.task.core
+        core_number = core_number_dict[core]
         start_time = job.start_time
         end_time = job.end_time
-        ax.barh(core, end_time - start_time, left=start_time, height=0.5, align='center', color=color)
+        ax.barh(core_number, end_time - start_time, left=start_time, height=0.5, align='center', color=color)
 
         duration = end_time - start_time
         label = f"{job} ({duration})"
         label_x = start_time + duration / 2
-        label_y = core
+        label_y = core_number
         ax.text(label_x, label_y, label, ha='center', va='center', color=get_appropriate_text_color(*color))
 
         # Add release time arrow
         release_time = job.release_time
-        ax.annotate('', xy=(release_time, core - 0.4), xytext=(release_time, core),
+        ax.annotate('', xy=(release_time, core_number - 0.4), xytext=(release_time, core_number),
                     arrowprops=dict(arrowstyle='->', color=color), va='center_baseline')
 
         # Add deadline arrow
         deadline = job.deadline
-        ax.annotate('', xy=(deadline, core - 0.4), xytext=(deadline, core),
+        ax.annotate('', xy=(deadline, core_number - 0.4), xytext=(deadline, core_number),
                     arrowprops=dict(arrowstyle='<-', color=color), va='baseline')
 
     # Set x-ticks and limits
@@ -66,16 +77,3 @@ def plot_gantt_chart(jobs: List[tasks.TaskInstance], core_overruns: dict, core_f
 
     # Show the plot
     plt.show()
-
-
-if __name__ == '__main__':
-    # Example usage
-    tasks = [
-        {'core': 1, 'start_time': 0, 'end_time': 20, 'label': 'task1', 'release_time': 0, 'deadline': 10},
-        {'core': 2, 'start_time': 5, 'end_time': 25, 'label': 'task2', 'release_time': 0, 'deadline': 35},
-        {'core': 1, 'start_time': 15, 'end_time': 30, 'label': 'task3', 'release_time': 13, 'deadline': 40},
-        {'core': 3, 'start_time': 25, 'end_time': 35, 'label': 'task4', 'release_time': 10, 'deadline': 30},
-    ]
-    num_cores = 3
-    total_time = 40
-    plot_gantt_chart(tasks, num_cores, total_time)

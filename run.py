@@ -42,6 +42,6 @@ def run(config_file):
 
 
 if __name__ == '__main__':
-    # list of all files in configs folder
-    for file in os.listdir('configs'):
-        run(f'configs/{file}')
+    # for file in os.listdir('configs'):
+    #     run(f'configs/{file}')
+    run('configs/1.1.yml')
