@@ -30,7 +30,8 @@ def plot_gantt_chart(
     core_number_dict = {core: i for i, core in enumerate(cores)}
 
     # Set up the figure and axis
-    fig, ax = plt.subplots(figsize=(100, 25))
+    # fig, ax = plt.subplots(figsize=(600, 25))
+    fig, ax = plt.subplots()
     ax.set_xlabel('Time')
     ax.set_ylabel('Core')
 
@@ -56,7 +57,7 @@ def plot_gantt_chart(
         label = f"{job} ({duration})"
         label_x = start_time + duration / 2
         label_y = core_number
-        ax.text(label_x, label_y, label, ha='center', va='center', color=get_appropriate_text_color(*color))
+        ax.text(label_x, label_y - 0.1, label, ha='center', va='center', color=get_appropriate_text_color(*color))
 
         # Add release time arrow
         release_time = job.release_time
@@ -67,6 +68,16 @@ def plot_gantt_chart(
         deadline = job.deadline
         ax.annotate('', xy=(deadline, core_number - 0.4), xytext=(deadline, core_number),
                     arrowprops=dict(arrowstyle='<-', color=color), va='baseline')
+
+        if job.deadline_missed_time:
+            ax.annotate('X', xy=(job.deadline_missed_time, core_number),
+                        xytext=(job.deadline_missed_time - 0.5, core_number - 0.5),
+                        arrowprops=dict(arrowstyle='-', color='red'), color='red', va='baseline')
+
+        if job.overrun_time:
+            ax.annotate('OVR', xy=(job.overrun_time, core_number),
+                        xytext=(job.overrun_time - 2, core_number - 0.5),
+                        arrowprops=dict(arrowstyle='-', color='orange'), color='orange', va='baseline')
 
     # Set x-ticks and limits
     ax.set_xticks(range(0, total_time + 1, 10))

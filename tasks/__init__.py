@@ -92,6 +92,8 @@ class TaskInstance:
         self.duration = duration if duration is not None else self.task.duration()
         self.remaining_time = self.duration
         self.number = len(task.instances) + 1
+        self.deadline_missed_time = None
+        self.overrun_time = None
         event_logger.log(
             release_time,
             f'[{self.task.get_core_name()}] Task {self.task.name}::'
