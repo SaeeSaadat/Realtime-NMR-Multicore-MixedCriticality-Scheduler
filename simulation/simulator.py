@@ -86,6 +86,8 @@ def run_simulation(
 
         if should_plot:
             chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
+        execution_table.register_all_jobs(all_jobs)
+        return execution_table
     except HighCriticalityTaskFailureException as e:
-        print(f"XXXXXXXX High criticality job {e.job} failed at {e.job.deadline_missed_time} XXXXXXXX")
-        chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
+        # chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
+        raise e

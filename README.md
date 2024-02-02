@@ -5,6 +5,27 @@ Sharif University of Technology - Real Time Systems project
 - Saee Saadat
 - Neda Taghizadeh
 
+# Simulator
+## Usage
+```shell
+python run.py <config_number> <mode>
+```
+examples:
+```shell
+python run.py # To run everything
+python run.py configs/1.1.yml
+python run.py configs/1.1.yml plot
+python run.py configs/1.1.yml edf-only
+```
+---
+## Stats: 
+Visit `final_records.yml` and `final_records_full.yml` for the final results of the simulations.
+You can find relevant logs in the `logs` folder.
+Please visit the `charts` folder for some generated charts.
+
+___
+# Task Generator
+
 ## Usage
 ```shell
 python generate.py <config_number> <mode>

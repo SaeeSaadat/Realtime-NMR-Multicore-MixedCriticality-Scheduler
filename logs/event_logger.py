@@ -45,8 +45,12 @@ def log(time, event):
     log_event(f'{time:10.0f}: {event}')
 
 
-def record(key, value):
+def record(key, value, mode=None, rnd=None):
     global records
+    if mode is not None and rnd is not None:
+        records[mode][rnd] = value
+    elif mode is not None:
+        key = f'{mode}_{key}'
     records[key] = value
 
 

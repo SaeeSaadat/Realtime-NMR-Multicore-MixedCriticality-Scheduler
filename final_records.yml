@@ -1,0 +1,72 @@
+1.1-EDF:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 0.920205920205937
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0
+1.1-EDF-VD:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 0.920205920205937
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0
+1.2-EDF:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 0.9185938170313347
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0
+1.2-EDF-VD:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 0.9185938170313347
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0
+2.1-EDF:
+  assignable count: 19 / 1000
+  assignable rate: 0.019
+  avg QoS: 0.016227051703599168
+  schedulable count: 18 / 1000
+  schedulable rate: 0.018
+2.1-EDF-VD:
+  assignable count: 26 / 1000
+  assignable rate: 0.026
+  avg QoS: 0.02344297194996667
+  schedulable count: 26 / 1000
+  schedulable rate: 0.026
+2.2-EDF:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 0.9510761914457357
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0
+2.2-EDF-VD:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 0.9510761914457357
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0
+3.1-EDF:
+  assignable count: 20 / 1000
+  assignable rate: 0.02
+  avg QoS: 0.019419465078553494
+  schedulable count: 20 / 1000
+  schedulable rate: 0.02
+3.1-EDF-VD:
+  assignable count: 21 / 1000
+  assignable rate: 0.021
+  avg QoS: 0.020683363857564165
+  schedulable count: 21 / 1000
+  schedulable rate: 0.021
+3.2-EDF:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 1.0266290649501302
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0
+3.2-EDF-VD:
+  assignable count: 1000 / 1000
+  assignable rate: 1.0
+  avg QoS: 1.0240932992557192
+  schedulable count: 1000 / 1000
+  schedulable rate: 1.0

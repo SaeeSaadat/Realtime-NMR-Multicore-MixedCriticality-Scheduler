@@ -144,6 +144,15 @@ class TaskInstance:
     def has_missed_deadline(self, current_time: int):
         return not self.is_finished and current_time > self.deadline
 
+    @property
+    def quality_of_service(self):
+        if self.start_time is None:
+            return 0
+        if isinstance(self.task, LowCriticalityTask):
+            last_time = min(self.deadline, self.end_time) if self.end_time is not None else self.deadline
+            return (last_time - self.start_time) / self.duration
+        return 0
+
 
 class LowCriticalityTask(Task):
     def __init__(self, period, wcet, utilization, name=None):
@@ -158,6 +167,7 @@ class LowCriticalityTask(Task):
         instance = super().instantiate(time, deadline)
         instance.duration = self.wcet
         return instance
+
 
 class HighCriticalityTask(Task):
     def __init__(self, period, wcet_hi, wcet_lo, utilization, number_of_copies=1, name=None):
