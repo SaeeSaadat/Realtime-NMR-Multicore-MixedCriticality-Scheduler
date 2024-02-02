@@ -7,4 +7,6 @@ class UnassignableTaskSet(Exception):
 
 
 class HighCriticalityTaskFailureException(Exception):
-    pass
+    def __init__(self, job):
+        super().__init__()
+        self.job = job

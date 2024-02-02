@@ -67,6 +67,9 @@ class Task:
             return self.core.name
         return ''
 
+    def missed_deadline(self, time, job):
+        pass
+
     def instantiate(self, time: int, deadline: int = None) -> 'TaskInstance':
         instance = TaskInstance(self, time, deadline=deadline)
         self.instances.append(instance)
@@ -100,6 +103,9 @@ class TaskInstance:
             f'{self.number} -> RELEASE, Deadline: {self.deadline}'
         )
 
+    def __eq__(self, other):
+        return self.task == other.task and self.number == other.number
+
     def execute(self, time: int):
         if self.start_time is None:
             event_logger.log(time, f'[{self.task.get_core_name()}] Task {self.task.name} -> START')
@@ -113,16 +119,19 @@ class TaskInstance:
     def finish(self, time):
         event_logger.log(time, f'[{self.task.get_core_name()}] Task {self.task.name} -> FINISH')
 
-    def is_failed(self, time) -> bool:
+    def is_past_deadline(self, time) -> bool:
         if time < self.deadline or self.remaining_time <= 0:
             return False
         if self.task.is_actual_deadline_same_as_period:
             return time > self.release_time + self.task.period
         return True
 
-    def fail(self, time):
-        if not self.is_failed(time):
+    def miss_deadline(self, time):
+        if not self.is_past_deadline(time):
             raise Exception(f"Task {self} is not failed!")
+        self.deadline_missed_time = time
+        print(f"Task {self} missed deadline at {time}")
+        self.task.missed_deadline(time, self)
         event_logger.log(time,
                          f'[{self.task.get_core_name()}] Task {self.task.name}::{self.number} -> MISSED DEADLINE!')
 
@@ -154,6 +163,11 @@ class HighCriticalityTask(Task):
         if self.core.is_overrun:
             print("Overrun!")
         return self.wcet_hi if self.core.is_overrun else self.wcet_lo
+
+    def missed_deadline(self, time, job: TaskInstance):
+        super().missed_deadline(time, job)
+        event_logger.log(time, f'HIGH CRITICALITY TASK {self.name} -> MISSED DEADLINE')
+        raise HighCriticalityTaskFailureException(job)
 
 
 class HighCriticalityTaskCopy(HighCriticalityTask):

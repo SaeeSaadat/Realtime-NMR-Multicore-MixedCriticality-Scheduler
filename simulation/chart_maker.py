@@ -41,42 +41,41 @@ def plot_gantt_chart(
 
     # Plot the tasks as horizontal bars
     for job in jobs:
-        if job.start_time is None:
-            continue
 
         if job.task not in task_colors:
             task_colors[job.task] = generate_random_color()
         color = task_colors[job.task]
         core = job.task.core
         core_number = core_number_dict[core]
-        start_time = job.start_time
-        end_time = job.end_time
-        ax.barh(core_number, end_time - start_time, left=start_time, height=0.5, align='center', color=color)
+        if job.start_time is not None:
+            start_time = job.start_time
+            end_time = job.end_time
+            ax.barh(core_number, end_time - start_time, left=start_time, height=0.5, align='center', color=color)
 
-        duration = end_time - start_time
-        label = f"{job} ({duration})"
-        label_x = start_time + duration / 2
-        label_y = core_number
-        ax.text(label_x, label_y - 0.1, label, ha='center', va='center', color=get_appropriate_text_color(*color))
+            duration = end_time - start_time
+            label = f"{job} ({duration})"
+            label_x = start_time + duration / 2
+            label_y = core_number
+            ax.text(label_x, label_y - 0.1, label, ha='center', va='center', color=get_appropriate_text_color(*color))
 
         # Add release time arrow
         release_time = job.release_time
-        ax.annotate('', xy=(release_time, core_number - 0.4), xytext=(release_time, core_number),
+        ax.annotate('', xy=(release_time, core_number - 0.6), xytext=(release_time, core_number),
                     arrowprops=dict(arrowstyle='->', color=color), va='center_baseline')
 
         # Add deadline arrow
         deadline = job.deadline
-        ax.annotate('', xy=(deadline, core_number - 0.4), xytext=(deadline, core_number),
+        ax.annotate('', xy=(deadline, core_number - 0.6), xytext=(deadline, core_number),
                     arrowprops=dict(arrowstyle='<-', color=color), va='baseline')
 
         if job.deadline_missed_time:
             ax.annotate('X', xy=(job.deadline_missed_time, core_number),
-                        xytext=(job.deadline_missed_time - 0.5, core_number - 0.5),
-                        arrowprops=dict(arrowstyle='-', color='red'), color='red', va='baseline')
+                        xytext=(job.deadline_missed_time + 1, core_number - 0.6),
+                        arrowprops=dict(arrowstyle='-', color='red', linewidth=2), color='red', va='baseline')
 
         if job.overrun_time:
             ax.annotate('OVR', xy=(job.overrun_time, core_number),
-                        xytext=(job.overrun_time - 2, core_number - 0.5),
+                        xytext=(job.overrun_time + 1, core_number - 0.6),
                         arrowprops=dict(arrowstyle='-', color='orange'), color='orange', va='baseline')
 
     # Set x-ticks and limits
