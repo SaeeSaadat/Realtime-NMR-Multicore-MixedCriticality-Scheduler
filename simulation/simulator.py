@@ -83,11 +83,14 @@ def run_simulation(
                     if core in overrunning_cores and isinstance(job.task, tasks.HighCriticalityTask):
                         core.overrun(time)
                         overrunning_cores.remove(core)
+                        for hcjob in active_jobs[core]:
+                            if isinstance(hcjob.task, tasks.HighCriticalityTask):
+                                hcjob.remaining_time += hcjob.task.wcet_hi - hcjob.task.wcet_lo
 
         if should_plot:
             chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
         execution_table.register_all_jobs(all_jobs)
         return execution_table
     except HighCriticalityTaskFailureException as e:
-        # chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
+        chart_maker.plot_gantt_chart(hyper_period, all_jobs, cores, core_overruns_inverse, core_failures_inverse)
         raise e
